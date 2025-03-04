@@ -40,7 +40,7 @@ jobs:
       # branch가 develop일 때
       if: contains(github.ref, 'develop')
       run: |
-      	# /src/main/resources 위치로 이동
+      # /src/main/resources 위치로 이동
         cd ./src/main/resources
         
         # application-dev.yml파일 생성

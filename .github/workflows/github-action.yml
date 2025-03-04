@@ -1,21 +1,11 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+name: Moduda CI/CD
 
-# github repository Actions 페이지에 나타낼 이름
-name: moduda CI/CD
-
-# 이벤트 트리거
 on:
   push:
     branches:
       - main
       - develop
 
-# Job
 jobs:
   CI-CD:
     runs-on: ubuntu-latest
@@ -68,15 +58,17 @@ jobs:
         if: contains(github.ref, 'main')
         run: |
           docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
-          docker build -f Dockerfile-prod -t ${{secrets.DOCKER_REPO}}/moduda-prod .
-          docker push ${{secrets.DOCKER_REPO}}/moduda-prod
+          docker build -f Dockerfile-prod -t ${{secrets.DOCKER_USERNAME}}/moduda:prod .
+          docker push ${{secrets.DOCKER_USERNAME}}/moduda:prod
+          docker logout
 
       - name: Docker build & push to dev
         if: contains(github.ref, 'develop')
         run: |
           docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
-          docker build -f Dockerfile-dev -t ${{secrets.DOCKER_REPO}}/moduda-dev .
-          docker push ${{secrets.DOCKER_REPO}}/moduda-dev
+          docker build -f Dockerfile-dev -t ${{secrets.DOCKER_USERNAME}}/moduda:dev .
+          docker push ${{secrets.DOCKER_USERNAME}}/moduda:dev
+          docker logout
 
       # deploy
       - name: Deploy to prod
@@ -87,12 +79,14 @@ jobs:
           host: ${{ secrets.HOST_PROD }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.PRIVATE_KEY }}
-          envs: GITHUB_SHA
+          port: 22
           script: |
-            sudo docker rm -f $(docker ps -qa)
-            sudo docker pull ${{ secrets.DOCKER_REPO }}/moduda-prod
-            docker-compose up -d
-            docker image prune -f
+            sudo docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
+            sudo docker rm -f moduda-prod
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/moduda:prod
+            sudo docker-compose -f docker-compose-prod.yml up -d
+            sudo docker image prune -f
+            sudo docker logout
 
       - name: Deploy to dev
         uses: appleboy/ssh-action@master
@@ -101,11 +95,13 @@ jobs:
         with:
           host: ${{ secrets.HOST_DEV }}
           username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.PRIVATE_KEY }}
           port: 22
-          #key: ${{ secrets.PRIVATE_KEY }}
           script: |
-            sudo docker rm -f $(docker ps -qa)
-            sudo docker pull ${{ secrets.DOCKER_REPO }}/moduda-dev
-            docker-compose up -d
-            docker image prune -f
+            sudo docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
+            sudo docker rm -f moduda-dev
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/moduda:dev
+            sudo docker-compose up -d
+            sudo docker image prune -f
+            sudo docker logout
+

@@ -44,6 +44,7 @@ jobs:
       - name: make application-dev.yml
         if: contains(github.ref, 'develop')
         run: |
+          mkdir ./src/main/resources
           cd ./src/main/resources
           touch ./application-dev.yml
           echo "${{ secrets.YML_DEV }}" >./application-dev.yml
@@ -52,6 +53,7 @@ jobs:
       - name: make application-prod.yml
         if: contains(github.ref, 'main')
         run: |
+          mkdir ./src/main/resources
           cd ./src/main/resources
           touch ./application-prod.yml
           echo "${{ secrets.YML_PROD }}" >./application-prod.yml

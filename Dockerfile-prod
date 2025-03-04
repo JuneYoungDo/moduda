@@ -1,5 +1,5 @@
-FROM eclipse-temurin:17-jdk
+FROM openjdk:17
 EXPOSE 8080
-ARG JAR_FILE=build/libs/MODUDA-0.0.1-SNAPSHOT.jar
+ARG JAR_FILE=build/libs/moduda-0.0.1-SNAPSHOT.jar
 COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java","-jar","-Dspring.profiles.active=prod","/app.jar"]
+ENTRYPOINT ["java","-jar","-Dspring.profiles.active=dev","/app.jar"]

@@ -22,26 +22,40 @@ public class GetLectureController {
 
     private final LectureService lectureService;
 
+    /**
+     * 월간 사용자의 강의 수강 여부 확인
+     *
+     * @param member
+     * @param year
+     * @param month
+     * @return
+     */
     @GetMapping("/progress/{year}/{month}")
-    public ResponseEntity<MemberLectureProgressResponse> getUserLectureProgress(
+    public ResponseEntity<MemberLectureProgressResponse> getMemberLectureProgress(
         @CurrentMember Member member, @PathVariable int year, @PathVariable int month) {
         return ResponseEntity.ok(lectureService.getUserLectureProgress(member, year, month));
     }
 
+    /**
+     * 해당 일자가 포함된 주간, 월간 사용자들의 진행도 파악
+     *
+     * @param date
+     * @return
+     */
     @GetMapping("/progress-summary/{date}")
     public ResponseEntity<LectureCompletionSummaryResponse> getLectureCompletionSummary(
         @PathVariable LocalDate date) {
         return ResponseEntity.ok(lectureService.getLectureCompletionSummary(date));
     }
 
+    /**
+     * 강의 상세 보기
+     *
+     * @param lectureId
+     * @return
+     */
     @GetMapping("/{lectureId}")
     public ResponseEntity<LectureDetailResponse> getLectureDetail(@PathVariable Long lectureId) {
         return ResponseEntity.ok(lectureService.getLectureDetail(lectureId));
-    }
-
-    @PostMapping("/{lectureId}/complete")
-    public ResponseEntity<Void> completeLecture(@CurrentMember Member member, @PathVariable Long lectureId) {
-        lectureService.completeLecture(member, lectureId);
-        return ResponseEntity.ok().build();
     }
 }

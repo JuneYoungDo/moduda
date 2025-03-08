@@ -30,14 +30,5 @@ public class Lecture extends BaseEntity {
     @Column(name = "lecture_type", nullable = false)
     private LectureType lectureType;
 
-    private String description1;
-    private String description2;
-    private String description3;
-    private String description4;
-    private String description5;
-    private String description6;
-    private String description7;
-    private String description8;
-
     private LocalDate lectureDate;
 }

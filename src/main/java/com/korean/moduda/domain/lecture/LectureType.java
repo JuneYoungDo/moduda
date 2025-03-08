@@ -6,6 +6,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum LectureType {
-    WEEKDAY, WEEKEND, SPECIAL
+    WEEKDAY, WEEKEND, SPECIAL_DAY, LAST_DAY, REPEAT_DAY
 }
 

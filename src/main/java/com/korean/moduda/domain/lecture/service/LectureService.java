@@ -1,13 +1,18 @@
 package com.korean.moduda.domain.lecture.service;
 
 import com.korean.moduda.domain.lecture.Lecture;
+import com.korean.moduda.domain.lecture.LectureType;
 import com.korean.moduda.domain.lecture.MemberLecture;
 import com.korean.moduda.domain.lecture.dto.LectureCompleted;
 import com.korean.moduda.domain.lecture.dto.LectureCompletionSummaryResponse;
-import com.korean.moduda.domain.lecture.dto.LectureDetailResponse;
 import com.korean.moduda.domain.lecture.dto.LectureProgress;
 import com.korean.moduda.domain.lecture.dto.MemberLectureProgressResponse;
+import com.korean.moduda.domain.lecture.repository.LectureLastRepository;
+import com.korean.moduda.domain.lecture.repository.LectureRepeatRepository;
 import com.korean.moduda.domain.lecture.repository.LectureRepository;
+import com.korean.moduda.domain.lecture.repository.LectureSpecialRepository;
+import com.korean.moduda.domain.lecture.repository.LectureWeekdayRepository;
+import com.korean.moduda.domain.lecture.repository.LectureWeekendRepository;
 import com.korean.moduda.domain.lecture.repository.MemberLectureRepository;
 import com.korean.moduda.domain.member.Member;
 import com.korean.moduda.domain.member.repository.MemberRepository;
@@ -31,8 +36,14 @@ public class LectureService {
     private final MemberRepository memberRepository;
     private final MemberLectureRepository memberLectureRepository;
     private final LectureRepository lectureRepository;
+    private final LectureWeekdayRepository lectureWeekdayRepository;
+    private final LectureWeekendRepository lectureWeekendRepository;
+    private final LectureLastRepository lectureLastRepository;
+    private final LectureRepeatRepository lectureRepeatRepository;
+    private final LectureSpecialRepository lectureSpecialRepository;
 
-    public MemberLectureProgressResponse getUserLectureProgress(Member member, int year, int month) {
+    public MemberLectureProgressResponse getUserLectureProgress(Member member, int year,
+        int month) {
         YearMonth yearMonth = YearMonth.of(year, month);
 
         List<LocalDate> allDates = new ArrayList<>();
@@ -53,7 +64,8 @@ public class LectureService {
 
         List<LectureCompleted> lectureProgressList = new ArrayList<>();
         for (LocalDate date : allDates) {
-            lectureProgressList.add(new LectureCompleted(date.toString(), progress.getOrDefault(date, false)));
+            lectureProgressList.add(
+                new LectureCompleted(date.toString(), progress.getOrDefault(date, false)));
         }
 
         return new MemberLectureProgressResponse(lectureProgressList);
@@ -96,29 +108,35 @@ public class LectureService {
     }
 
 
-    public LectureDetailResponse getLectureDetail(Long lectureId) {
+    public Object getLectureDetail(Long lectureId) {
         Lecture lecture = lectureRepository.findById(lectureId)
             .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND));
-        return new LectureDetailResponse(
-            lecture.getId(),
-            lecture.getLectureType(),
-            lecture.getDescription1(),
-            lecture.getDescription2(),
-            lecture.getDescription3(),
-            lecture.getDescription4(),
-            lecture.getDescription5(),
-            lecture.getDescription6(),
-            lecture.getDescription7(),
-            lecture.getDescription8(),
-            lecture.getLectureDate()
-        );
+
+        LectureType type = lecture.getLectureType();
+        Object object = new Object();
+        switch (type) {
+            case WEEKDAY -> object = lectureWeekdayRepository.findById(lectureId)
+                .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND));
+            case WEEKEND -> object = lectureWeekendRepository.findById(lectureId)
+                .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND));
+            case LAST_DAY -> object = lectureLastRepository.findById(lectureId)
+                .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND));
+            case REPEAT_DAY -> object = lectureRepeatRepository.findById(lectureId)
+                .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND));
+            case SPECIAL_DAY -> object = lectureSpecialRepository.findById(lectureId)
+                .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND));
+            default -> throw new BaseException(LectureErrorCode.INVALID_LECTURE_TYPE);
+        }
+
+        return object;
     }
 
     public void completeLecture(Member member, Long lectureId) {
         Lecture lecture = lectureRepository.findById(lectureId)
             .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND));
 
-        MemberLecture memberLecture = memberLectureRepository.findByMemberAndLecture(member, lecture)
+        MemberLecture memberLecture = memberLectureRepository.findByMemberAndLecture(member,
+                lecture)
             .orElseGet(() -> {
                 MemberLecture newMemberLecture = MemberLecture.builder()
                     .member(member)

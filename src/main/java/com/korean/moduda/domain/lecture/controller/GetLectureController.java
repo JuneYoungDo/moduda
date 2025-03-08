@@ -1,7 +1,6 @@
 package com.korean.moduda.domain.lecture.controller;
 
 import com.korean.moduda.domain.lecture.dto.LectureCompletionSummaryResponse;
-import com.korean.moduda.domain.lecture.dto.LectureDetailResponse;
 import com.korean.moduda.domain.lecture.dto.MemberLectureProgressResponse;
 import com.korean.moduda.domain.lecture.service.LectureService;
 import com.korean.moduda.domain.member.Member;
@@ -11,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -55,7 +53,7 @@ public class GetLectureController {
      * @return
      */
     @GetMapping("/{lectureId}")
-    public ResponseEntity<LectureDetailResponse> getLectureDetail(@PathVariable Long lectureId) {
+    public ResponseEntity<?> getLectureDetail(@PathVariable Long lectureId) {
         return ResponseEntity.ok(lectureService.getLectureDetail(lectureId));
     }
 }

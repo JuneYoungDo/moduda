@@ -5,7 +5,12 @@ import com.korean.moduda.domain.lecture.LectureType;
 import com.korean.moduda.domain.lecture.MemberLecture;
 import com.korean.moduda.domain.lecture.dto.LectureCompleted;
 import com.korean.moduda.domain.lecture.dto.LectureCompletionSummaryResponse;
+import com.korean.moduda.domain.lecture.dto.LectureLastResponse;
 import com.korean.moduda.domain.lecture.dto.LectureProgress;
+import com.korean.moduda.domain.lecture.dto.LectureRepeatResponse;
+import com.korean.moduda.domain.lecture.dto.LectureSpecialResponse;
+import com.korean.moduda.domain.lecture.dto.LectureWeekdayResponse;
+import com.korean.moduda.domain.lecture.dto.LectureWeekendReponse;
 import com.korean.moduda.domain.lecture.dto.MemberLectureProgressResponse;
 import com.korean.moduda.domain.lecture.repository.LectureLastRepository;
 import com.korean.moduda.domain.lecture.repository.LectureRepeatRepository;
@@ -113,18 +118,23 @@ public class LectureService {
             .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND));
 
         LectureType type = lecture.getLectureType();
-        Object object = new Object();
+        Object object;
         switch (type) {
-            case WEEKDAY -> object = lectureWeekdayRepository.findById(lectureId)
-                .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND));
-            case WEEKEND -> object = lectureWeekendRepository.findById(lectureId)
-                .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND));
-            case LAST_DAY -> object = lectureLastRepository.findById(lectureId)
-                .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND));
-            case REPEAT_DAY -> object = lectureRepeatRepository.findById(lectureId)
-                .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND));
-            case SPECIAL_DAY -> object = lectureSpecialRepository.findById(lectureId)
-                .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND));
+            case WEEKDAY ->
+                object = new LectureWeekdayResponse(lectureWeekdayRepository.findById(lectureId)
+                    .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND)));
+            case WEEKEND ->
+                object = new LectureWeekendReponse(lectureWeekendRepository.findById(lectureId)
+                    .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND)));
+            case LAST_DAY ->
+                object = new LectureLastResponse(lectureLastRepository.findById(lectureId)
+                    .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND)));
+            case REPEAT_DAY ->
+                object = new LectureRepeatResponse(lectureRepeatRepository.findById(lectureId)
+                    .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND)));
+            case SPECIAL_DAY ->
+                object = new LectureSpecialResponse(lectureSpecialRepository.findById(lectureId)
+                    .orElseThrow(() -> new BaseException(LectureErrorCode.LECTURE_NOT_FOUND)));
             default -> throw new BaseException(LectureErrorCode.INVALID_LECTURE_TYPE);
         }
 

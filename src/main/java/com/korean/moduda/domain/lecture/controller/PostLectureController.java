@@ -11,6 +11,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -66,5 +67,12 @@ public class PostLectureController {
         MultipartFile file) throws IOException {
         return new ResponseEntity(mediaService.saveVideoFile(member, lectureId, file),
             HttpStatus.OK);
+    }
+
+    @DeleteMapping("/media/{mediaId}")
+    public ResponseEntity<Void> deleteMedia(@CurrentMember Member member,
+        @PathVariable Long mediaId) throws IOException {
+        mediaService.deleteMediaFile(member, mediaId);
+        return new ResponseEntity(200, HttpStatus.OK);
     }
 }

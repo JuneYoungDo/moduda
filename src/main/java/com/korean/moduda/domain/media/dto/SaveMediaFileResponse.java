@@ -6,5 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class SaveMediaFileResponse {
+    private Long mediaId;
     private String fileUrl;
 }

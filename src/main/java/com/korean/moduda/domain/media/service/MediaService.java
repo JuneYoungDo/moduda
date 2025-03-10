@@ -7,6 +7,8 @@ import com.korean.moduda.domain.media.MediaType;
 import com.korean.moduda.domain.media.dto.SaveMediaFileResponse;
 import com.korean.moduda.domain.media.repository.MediaRepository;
 import com.korean.moduda.domain.member.Member;
+import com.korean.moduda.global.exception.BaseException;
+import com.korean.moduda.global.exception.errorCode.MediaErrorCode;
 import com.korean.moduda.global.util.S3Service;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
@@ -39,7 +41,7 @@ public class MediaService {
             .build();
 
         save(media);
-        return new SaveMediaFileResponse(media.getUrl());
+        return new SaveMediaFileResponse(media.getId(), media.getUrl());
     }
 
     public SaveMediaFileResponse saveVideoFile(Member member, Long lectureId, MultipartFile file)
@@ -54,6 +56,16 @@ public class MediaService {
             .build();
 
         save(media);
-        return new SaveMediaFileResponse(media.getUrl());
+        return new SaveMediaFileResponse(media.getId(), media.getUrl());
+    }
+
+    public void deleteMediaFile(Member member, Long mediaId) {
+        Media media = mediaRepository.findById(mediaId).orElseThrow(() -> new BaseException(
+            MediaErrorCode.INVALID_MEDIA));
+        if (!media.getMember().getId().equals(member.getId())) {
+            throw new BaseException(MediaErrorCode.AUTHORIZATION_ERROR);
+        }
+        s3Service.deleteFile(media.getUrl());
+        mediaRepository.deleteById(mediaId);
     }
 }
